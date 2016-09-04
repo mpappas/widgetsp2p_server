@@ -1,23 +1,23 @@
-var http = require('http');
-var fs = require('fs');
+var express = require("express");
+var bodyParser = require("body-parser");
+var couchbase = require("couchbase");
+var path = require("path");
+var config = require("./config");
+var app = express();
 
-// 404 Response
-function send404Response (response) {
-    response.writeHead(404, {"Content-Type": "text/plain" });
-    response.wirte("Error mpre!!!!");
-    response.end();
-};
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Handle a User Request
-function onRequest(request, response) {
 
-    if ( request.method == 'GET' && request.url == '/') {
-        response.writeHead(200, {"Content-Type": "text/html"});
-        fs.createReadStream("./index.html").pipe(response);
-    }else{
-        send404Response(response);
-    }
-};
 
-http.createServer(onRequest).listen(8080);
-console.log("Server is running...");
+// Global declaration of the Couchbase server and bucket to be used
+module.exports.bucket = (new couchbase.Cluster(config.couchbase.server)).openBucket(config.couchbase.bucket);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+// All endpoints to be used in this application
+var routes = require("./routes/routes.js")(app);
+
+var server = app.listen(3000, function () {
+    console.log("Listening on port %s...", server.address().port);
+});
