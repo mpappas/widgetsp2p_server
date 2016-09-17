@@ -1,1 +1,0 @@
-### Node.js application oublicwith CouchDB. Users registration and available/enabled widgets
